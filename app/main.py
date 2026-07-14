@@ -1,26 +1,25 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.config import get_settings
-from app.database import init_db
+
+from app.models import AuditRequest, AuditResponse
 
 settings = get_settings()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-
-    await init_db()
-    print("✅ BD inicializada")
+    print("✅ Accesible360 inicializada")
     yield
-
     print("⏹️ App cerrando...")
 
 
 
 app = FastAPI(
     title="Accesible360 API",
+    description="API de auditoría WCAG 2.1 AA",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -34,23 +33,39 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    """Manejo general de errores no controlados."""
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Error interno del servidor",
+            "detail": str(exc) if settings.environment == "development" else None
+        }
+    )
+
 @app.get("/health")
 async def health_check():
 
-    return JSONResponse(
-        status_code=200,
-        content={
+    return {
             "status": "ok",
             "version": "1.0.0",
             "environment": settings.environment,
         }
-    )
 
+@app.get("/")
+async def root():
+    """Root endpoint."""
+    return {
+        "message": "Accesible360 API",
+        "docs": "/docs",
+        "health": "/health"
+    }
 
 @app.post("/api/v1/audits")
-async def create_audit(domain: str):
+async def create_audit(request: AuditRequest):
 
-    return {"message": f"Audit endpoint for {domain} - coming soon"}
+    return {"message": f"Audit endpoint for {request.domain} - coming soon"}
 
 
 @app.get("/api/v1/audits/{audit_id}")

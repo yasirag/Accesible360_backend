@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Optional, Dict, Any
 from uuid import uuid4
-from sqlalchemy import Column, String, Integer, DateTime, JSON, func
-from sqlalchemy.dialects.postgresql import UUID
-from pydantic import BaseModel, Field, field_validator, EmailStr, ConfigDict
+from sqlalchemy import Column, String, Integer, DateTime, JSON, Index, func
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from pydantic import BaseModel, Field,  field_validator, ConfigDict
 
 from app.database import Base
 
@@ -11,14 +11,19 @@ from app.database import Base
 class Audit(Base):
     __tablename__ = "audits"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    domain = Column(String(255), nullable=False, index=True)
-    score_overall = Column(Integer, nullable=False)
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
+    domain = Column(String(255), nullable=False)
+    score_overall = Column(Integer, nullable=True)
     results = Column(JSON, nullable=False)
     screenshot_url = Column(String(500), nullable=True)
     customer_email = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), default=func.now(), nullable=False, index=True)
     updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now(), nullable=False)
+
+    __table_args__ = (
+        Index('idx_domain', 'domain'),
+        Index('idx_created_at', 'created_at'),
+    )
 
     def __repr__(self) -> str:
         return f"<Audit(id={self.id}, domain={self.domain}, score={self.score_overall})>"
@@ -27,8 +32,8 @@ class Audit(Base):
 class UserError(Base):
     __tablename__ = "user_errors"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    domain = Column(String(255), nullable=True, index=True)
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
+    domain = Column(String(255), nullable=True)
     error_type = Column(String(50), nullable=False, index=True)
     error_message = Column(String(500), nullable=False)
     created_at = Column(DateTime(timezone=True), default=func.now(), nullable=False, index=True)
@@ -65,7 +70,3 @@ class ErrorResponse(BaseModel):
 
     error: str
 
-
-class EmailRequest(BaseModel):
-
-    email: EmailStr
