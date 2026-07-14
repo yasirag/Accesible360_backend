@@ -5,8 +5,6 @@ from app.config import get_settings
 
 
 Base = declarative_base()
-
-
 settings = get_settings()
 
 
