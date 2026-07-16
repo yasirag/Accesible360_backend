@@ -3,9 +3,11 @@ from typing import Dict, Any
 
 def calculate_score(indicators: Dict[str, Any]) -> int:
 
-    forms_violations = indicators.get("forms", {}).get("violations", 0)
+    total_violations = 0
+    for indicator_name, indicator_data in indicators.items():
+        violations = indicator_data.get("violations", 0)
+        total_violations += violations
 
-    # Score base 100, restar puntos por violaciones
-    score = max(0, 100 - (forms_violations * 5))
+    score = max(0, 100 - (total_violations * 5))
 
     return int(score)
