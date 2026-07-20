@@ -1,7 +1,13 @@
 from fastapi import FastAPI
 from app.routes import audits
 from app.config import get_settings
+import logging
 
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 settings = get_settings()
 
 app = FastAPI(
