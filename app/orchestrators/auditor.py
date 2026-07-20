@@ -8,7 +8,7 @@ from app.parsers.heading_parser import HeadingParser
 from app.parsers.link_parser import LinkParser
 from app.scoring import calculate_score
 from app.config import get_settings
-
+from app.orchestrators.enrichment import PlanEnricher
 
 class Auditor:
 
@@ -35,9 +35,13 @@ class Auditor:
                           }
             score = calculate_score(indicators)
 
+            enricher = PlanEnricher()
+            action_plan = await enricher.enrich_violations(indicators)
+
             return {
                 "indicators": indicators,
-                "score_overall": score
+                "score_overall": score,
+                "action_plan": action_plan
             }
 
         finally:
