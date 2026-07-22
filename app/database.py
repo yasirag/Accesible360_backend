@@ -19,18 +19,15 @@ engine = create_async_engine(
     future=True,
 )
 
-# Session factory
 SessionLocal = async_sessionmaker(
     engine,
     class_=AsyncSession,
     expire_on_commit=False,
 )
 
-# Base para modelos
 Base = declarative_base()
 
 async def get_db():
-    """Proporciona sesión de BD a FastAPI."""
     async with SessionLocal() as session:
         try:
             yield session
