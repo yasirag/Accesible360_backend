@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     groq_timeout: int = 5
     groq_max_tokens: int = 500
 
+    sendgrid_api_key: str = ""
+    sendgrid_from_email: str = "noreply@nexalocal.studio"
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

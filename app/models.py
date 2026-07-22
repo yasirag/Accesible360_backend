@@ -3,9 +3,11 @@ from typing import Optional, Dict, Any
 from uuid import uuid4
 from sqlalchemy import Column, String, Integer, DateTime, JSON, Index, func
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from pydantic import BaseModel, Field,  field_validator, ConfigDict
+from sqlalchemy.orm import declarative_base
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
-from app.database import Base
+# Crear Base para ORM
+Base = declarative_base()
 
 
 class Audit(Base):
@@ -43,19 +45,29 @@ class UserError(Base):
 
 
 class AuditRequest(BaseModel):
-
     domain: str = Field(..., min_length=3, max_length=255)
 
     @field_validator("domain")
     @classmethod
     def normalize_domain(cls, v: str) -> str:
-
         v = v.replace("https://", "").replace("http://", "")
         return v.rstrip("/")
 
 
-class AuditResponse(BaseModel):
+class SendEmailRequest(BaseModel):
+    """Request para enviar email de auditoría."""
+    email: str = Field(..., min_length=5, max_length=255)
 
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        """Validación básica de email."""
+        if "@" not in v or "." not in v:
+            raise ValueError("Email inválido")
+        return v.lower()
+
+
+class AuditResponse(BaseModel):
     audit_id: str
     domain: str
     score_overall: int = Field(..., ge=0, le=100)
@@ -67,6 +79,4 @@ class AuditResponse(BaseModel):
 
 
 class ErrorResponse(BaseModel):
-
     error: str
-
