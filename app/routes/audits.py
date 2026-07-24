@@ -1,5 +1,7 @@
+
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
+from fastapi.responses import StreamingResponse
 from uuid import uuid4
 from datetime import datetime, timezone
 from pydantic import BaseModel, field_validator
@@ -10,6 +12,7 @@ from app.urls import extract_domain
 from app.orchestrators.auditor import auditor
 from app.database import get_db
 from app.models import Audit, EmailSubmission
+from app.servicios.pdf_service import PDFService
 
 class AuditRequest(BaseModel):
     domain: str
@@ -27,8 +30,10 @@ class SendEmailRequest(BaseModel):
 
 url_validator = URLValidator()
 email_validator = EmailValidator()
+pdf_service = PDFService()
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
 
 
 @router.post("/audits")
@@ -162,4 +167,56 @@ async def send_audit_email(
     except Exception as e:
         logger.error(f"[EMAIL] Error: {str(e)}")
         session.rollback()
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+@router.get("/audits/{audit_id}/pdf")
+async def download_audit_pdf(
+        audit_id: str,
+        session: Session = Depends(get_db)
+):
+    """
+    Descarga el PDF de una auditoría.
+    """
+    logger.info(f"[PDF] Descargando PDF para audit {audit_id}")
+
+    try:
+        audit = session.query(Audit).filter(Audit.id == audit_id).first()
+
+        if not audit:
+            logger.warning(f"[PDF] Audit {audit_id} no encontrado")
+            raise HTTPException(status_code=404, detail=f"Auditoría {audit_id} no encontrada")
+
+        domain = audit.domain
+        score = audit.score_overall
+        indicators = audit.results
+        action_plan = indicators.get("action_plan", []) if isinstance(indicators, dict) else []
+        timestamp = audit.created_at.isoformat() if audit.created_at else datetime.now(timezone.utc).isoformat()
+
+        logger.info(f"[PDF] Generando PDF para {domain}")
+
+        pdf_bytes = pdf_service.generate_audit_pdf(
+            domain=domain,
+            score=score,
+            indicators=indicators,
+            action_plan=action_plan,
+            timestamp=timestamp
+        )
+
+        fecha = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        filename = f"auditoria_{domain}_{fecha}.pdf"
+
+        logger.info(f"[PDF] PDF generado: {filename}")
+
+        # Retornar como StreamingResponse
+        return StreamingResponse(
+            iter([pdf_bytes]),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error(f"[PDF] Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
