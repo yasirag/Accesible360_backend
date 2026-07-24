@@ -4,16 +4,16 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 from dotenv import load_dotenv
+from app.database import Base
 
-# Cargar variables de entorno
+
 load_dotenv()
 
 config = context.config
-
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = None
+target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
@@ -39,7 +39,6 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode."""
 
     db_user = os.getenv("DATABASE_USER", "postgres")
     db_password = os.getenv("DATABASE_PASSWORD", "")

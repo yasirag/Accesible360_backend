@@ -1,12 +1,14 @@
 """
 app/database.py
-Configuración de la conexión a PostgreSQL con SQLAlchemy (async).
+Configuración de la conexión a PostgreSQL con SQLAlchemy (SYNC con psycopg).
 """
 
 import os
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.pool import NullPool
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+
+load_dotenv()
 
 # Variables de entorno
 DATABASE_USER = os.getenv("DATABASE_USER", "postgres")
@@ -15,23 +17,19 @@ DATABASE_HOST = os.getenv("DATABASE_HOST", "localhost")
 DATABASE_PORT = os.getenv("DATABASE_PORT", "5432")
 DATABASE_NAME = os.getenv("DATABASE_NAME", "Accesible360")
 
-# URL de conexión (async con asyncpg)
-DATABASE_URL = f"postgresql+asyncpg://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
+# URL de conexión (SYNC con psycopg)
+DATABASE_URL = f"postgresql+psycopg://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
 
-# Engine async
-engine = create_async_engine(
+# Engine SYNC (no async)
+engine = create_engine(
     DATABASE_URL,
     echo=False,
     future=True,
-    pool_pre_ping=True,
-    poolclass=NullPool,
 )
 
-# Session factory
-SessionLocal = async_sessionmaker(
+# Session factory SYNC (no async)
+SessionLocal = sessionmaker(
     engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
     autocommit=False,
     autoflush=False,
 )
@@ -40,15 +38,15 @@ SessionLocal = async_sessionmaker(
 Base = declarative_base()
 
 
-async def get_db():
-    """Dependency para FastAPI - proporciona sesión de BD."""
-    async with SessionLocal() as session:
-        try:
-            yield session
-        finally:
-            await session.close()
+def get_db():
+    """Dependency para FastAPI - proporciona sesión de BD (SYNC)."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
-async def close_db():
+def close_db():
     """Cierra el engine en shutdown de FastAPI."""
-    await engine.dispose()
+    engine.dispose()

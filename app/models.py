@@ -65,6 +65,17 @@ class AuditResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class EmailSubmission(Base):
+    __tablename__ = "email_submissions"
+
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
+    audit_id = Column(PG_UUID(as_uuid=True), nullable=False, index=True)
+    email = Column(String(255), nullable=False)
+    sent_at = Column(DateTime(timezone=True), default=func.now(), nullable=False)
+    status = Column(String(50), default='pending', nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<EmailSubmission(email={self.email}, status={self.status})>"
 
 class ErrorResponse(BaseModel):
 

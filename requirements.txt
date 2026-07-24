@@ -1,7 +1,6 @@
 alembic==1.18.5
 annotated-types==0.7.0
 anyio==3.7.1
-asyncpg==0.31.0
 beautifulsoup4==4.12.2
 certifi==2026.6.17
 charset-normalizer==3.4.9
@@ -47,3 +46,5 @@ urllib3==2.7.0
 uvicorn==0.24.0
 watchfiles==1.2.0
 websockets==16.0
+psycopg==3.3.4
+psycopg-binary==3.3.4
