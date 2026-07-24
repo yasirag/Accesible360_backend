@@ -1,4 +1,9 @@
+from app.validations.url_validator import URLValidator, URLValidationError
+from app.validations.email_validator import EmailValidator, EmailValidationError
 
-from .url_validator import URLValidator, URLValidationError
-
-__all__ = ["URLValidator", "URLValidationError"]
+__all__ = [
+    "URLValidator",
+    "URLValidationError",
+    "EmailValidator",
+    "EmailValidationError",
+]

@@ -22,11 +22,7 @@ class PlanEnricher:
         for rank, (indicator, indicator_data) in enumerate(sorted_indicators, 1):
             violations_count = indicator_data.get("violations", 0)
             elements = indicator_data.get("elements", [])
-
-            # Obtener explicación general (what/why/how)
             explanation = await self._generate_explanations(indicator, indicator_data)
-
-            # Aplicar MISMA explicación a TODOS los elementos
             enriched_elements = []
             for idx, element in enumerate(elements):
                 enriched_elements.append({
