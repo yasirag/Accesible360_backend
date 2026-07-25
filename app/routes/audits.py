@@ -53,12 +53,13 @@ async def create_audit(
         logger.info(f"[AUDITS] Auditoría completada")
 
         audit_id = uuid4()
-
+        results_with_plan = result["indicators"].copy()
+        results_with_plan["action_plan"] = result.get("action_plan", [])
         audit = Audit(
             id=audit_id,
             domain=domain,
             score_overall=result["score_overall"],
-            results=result["indicators"],
+            results=results_with_plan,
             screenshot_url=None,
             customer_email=None,
             created_at=datetime.now(timezone.utc),
@@ -174,9 +175,6 @@ async def download_audit_pdf(
         audit_id: str,
         session: Session = Depends(get_db)
 ):
-    """
-    Descarga el PDF de una auditoría.
-    """
     logger.info(f"[PDF] Descargando PDF para audit {audit_id}")
 
     try:
@@ -206,8 +204,6 @@ async def download_audit_pdf(
         filename = f"auditoria_{domain}_{fecha}.pdf"
 
         logger.info(f"[PDF] PDF generado: {filename}")
-
-        # Retornar como StreamingResponse
         return StreamingResponse(
             iter([pdf_bytes]),
             media_type="application/pdf",
