@@ -9,7 +9,6 @@ class Settings(BaseSettings):
     api_port: int = int(os.getenv("PORT", 8000))
     api_v1_prefix: str = "/api/v1"
 
-    # DATABASE: Usa connection string completo de Neon
     database_url: str = os.getenv(
         "DATABASE_URL",
         "postgresql://localhost:5432/accesible360"
