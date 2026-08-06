@@ -6,7 +6,6 @@ from alembic import context
 from dotenv import load_dotenv
 from app.database import Base
 
-
 load_dotenv()
 
 config = context.config
@@ -19,13 +18,9 @@ target_metadata = Base.metadata
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
 
-    db_user = os.getenv("DATABASE_USER", "postgres")
-    db_password = os.getenv("DATABASE_PASSWORD", "")
-    db_host = os.getenv("DATABASE_HOST", "localhost")
-    db_port = os.getenv("DATABASE_PORT", "5432")
-    db_name = os.getenv("DATABASE_NAME", "Accesible360")
-
-    url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    # Usar DATABASE_URL si existe (Railway/Neon), si no construir manualmente
+    url = os.getenv(
+        "DATABASE_URL") or f"postgresql://{os.getenv('DATABASE_USER', 'postgres')}:{os.getenv('DATABASE_PASSWORD', '')}@{os.getenv('DATABASE_HOST', 'localhost')}:{os.getenv('DATABASE_PORT', '5432')}/{os.getenv('DATABASE_NAME', 'Accesible360')}"
 
     context.configure(
         url=url,
@@ -39,14 +34,11 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
+    """Run migrations in 'online' mode."""
 
-    db_user = os.getenv("DATABASE_USER", "postgres")
-    db_password = os.getenv("DATABASE_PASSWORD", "")
-    db_host = os.getenv("DATABASE_HOST", "localhost")
-    db_port = os.getenv("DATABASE_PORT", "5432")
-    db_name = os.getenv("DATABASE_NAME", "Accesible360")
-
-    url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    # Usar DATABASE_URL si existe (Railway/Neon), si no construir manualmente
+    url = os.getenv(
+        "DATABASE_URL") or f"postgresql://{os.getenv('DATABASE_USER', 'postgres')}:{os.getenv('DATABASE_PASSWORD', '')}@{os.getenv('DATABASE_HOST', 'localhost')}:{os.getenv('DATABASE_PORT', '5432')}/{os.getenv('DATABASE_NAME', 'Accesible360')}"
 
     configuration = {
         "sqlalchemy.url": url
