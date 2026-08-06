@@ -1,32 +1,31 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+import os
 
 
 class Settings(BaseSettings):
-
-    environment: str = "development"
+    environment: str = os.getenv("ENVIRONMENT", "development")
     api_host: str = "0.0.0.0"
-    api_port: int = 8000
+    api_port: int = int(os.getenv("PORT", 8000))
     api_v1_prefix: str = "/api/v1"
 
-    database_url: str = ""
-    database_user: str = ""
-    database_password: str = ""
-    database_host: str = "localhost"
-    database_port: int = 5432
-    database_name: str = ""
+    # DATABASE: Usa connection string completo de Neon
+    database_url: str = os.getenv(
+        "DATABASE_URL",
+        "postgresql://localhost:5432/accesible360"
+    )
 
     audit_timeout_seconds: int = 30
     max_retries: int = 2
     playwright_timeout: int = 10
 
-    groq_api_key: str = ""
+    groq_api_key: str = os.getenv("GROQ_API_KEY", "")
     groq_api_url: str = "https://api.groq.com/openai/v1/chat/completions"
-    groq_model: str = "llama-3.3-70b-versatile"
+    groq_model: str = "llama-3.1-70b-versatile"
     groq_timeout: int = 5
     groq_max_tokens: int = 500
 
-    sendgrid_api_key: str = ""
+    sendgrid_api_key: str = os.getenv("SENDGRID_API_KEY", "")
     sendgrid_from_email: str = "noreply@nexalocal.studio"
 
     class Config:
