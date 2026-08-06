@@ -22,7 +22,7 @@ app = FastAPI(
 )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[ FRONTEND_URL, "http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[  "https://accesible360-frontend-75g1-a1heegzjx-yasirags-projects.vercel.app", "http://localhost:5173", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
