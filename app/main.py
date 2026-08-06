@@ -3,7 +3,7 @@ from app.routes import audits
 from app.config import get_settings
 from fastapi.middleware.cors import CORSMiddleware
 import logging
-
+import os
 
 logging.basicConfig(
     level=logging.INFO,
@@ -11,13 +11,18 @@ logging.basicConfig(
 )
 settings = get_settings()
 
+FRONTEND_URL = os.getenv(
+    "CORS_FRONTEND_URL",
+    "http://localhost:5173"
+)
+
 app = FastAPI(
     title="Accesible360",
     version="0.1.0"
 )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[ FRONTEND_URL, "http://localhost:5173", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
