@@ -20,7 +20,7 @@ class Settings(BaseSettings):
 
     groq_api_key: str = os.getenv("GROQ_API_KEY", "")
     groq_api_url: str = "https://api.groq.com/openai/v1/chat/completions"
-    groq_model: str = "llama-3.1-8b-instant"
+    groq_model: str = "llama-3.3-70b-versatile"
     groq_timeout: int = 5
     groq_max_tokens: int = 500
 
